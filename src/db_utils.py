@@ -24,24 +24,33 @@ def get_embedding(text):
     return client.embeddings.create(input = [text], model=MODEL).data[0].embedding
 
 
-def search_verses(text, limit=5, max_distance=0.9):
-
-    embedding = get_embedding(text)
-
+def search_verses(text:str, translation:str, limit:int=5, max_distance:float=0.75):
     with sessionlocal() as session:
-        distance = BibleVerse.embedding.cosine_distance(embedding)
-
-        verses = (
-            select(BibleVerse)
-            .join(Translation)
-            .options(joinedload(BibleVerse.translation))
-            .where(distance < max_distance)
+        translation_exists = session.scalar(
+            select(Translation.id).where(Translation.code == translation)
         )
 
-        return session.scalars(
-            verses.order_by(distance).limit(limit)
-        ).all()
+        if translation_exists is None:
+            raise TranslationNotFoundError(f"Translation code not found: {translation}")
 
+        embedding = get_embedding(text)
+        distance = BibleVerse.embedding.cosine_distance(embedding)
+
+        stmt = (
+            select(BibleVerse, distance.label("distance"))
+            .join(Translation)
+            .options(joinedload(BibleVerse.translation))
+            .order_by(distance)
+            .limit(limit)
+            .where(
+                distance < max_distance,
+                Translation.code == translation
+            )
+        )
+
+        results = session.execute(stmt).all()
+
+        return results
 
 
 def get_all_verses():
@@ -49,3 +58,7 @@ def get_all_verses():
         return session.scalars(
             select(BibleVerse).options(joinedload(BibleVerse.translation))
         ).all()
+
+
+class TranslationNotFoundError(Exception):
+    pass
