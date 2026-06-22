@@ -35,10 +35,4 @@ class BibleVerse(Base):
 
 	__table_args__ = (
 		UniqueConstraint("translation_id", "book", "chapter", "verse", name="uq_bible_verse_reference"),
-		Index(
-			"ix_bible_verses_embedding",
-			"embedding",
-			postgresql_using="ivfflat",
-			postgresql_ops={"embedding": "vector_cosine_ops"},
-		),
 	)
