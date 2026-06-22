@@ -22,7 +22,7 @@ MOCK_TRANSLATIONS = [
         "name": "Mock English",
         "verses": [
             ("Genesis", 1, 1, "In the beginning, light and form were made."),
-            ("John", 1, 1, "In the beginning was the Word, and the Word was with God."),
+            ("John", 1, 1, "In the beginning was the Word, and the Word was with God, and the Word was God."),
             ("Psalms", 23, 1, "The Lord is my shepherd; I shall not want."),
         ],
     },
@@ -31,7 +31,7 @@ MOCK_TRANSLATIONS = [
         "name": "Mock Spanish",
         "verses": [
             ("Genesis", 1, 1, "En el principio, la luz y la forma fueron hechas."),
-            ("Juan", 1, 1, "En el principio era el Verbo, y el Verbo estaba con Dios."),
+            ("Juan", 1, 1, "En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios."),
             ("Salmos", 23, 1, "El Senor es mi pastor; nada me faltara."),
         ],
     },
