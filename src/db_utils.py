@@ -60,5 +60,10 @@ def get_all_verses():
         ).all()
 
 
+def get_all_translations():
+    with sessionlocal() as session:
+        return session.scalars(select(Translation)).all()
+
+
 class TranslationNotFoundError(Exception):
     pass

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from db_utils import search_verses, TranslationNotFoundError
+from db_utils import search_verses, TranslationNotFoundError, get_all_translations
 
 
 class QueryModel(BaseModel):
@@ -33,3 +33,9 @@ def closest_matches(query: str, translation: str, limit: int = 5, max_distance: 
                 for verse, dist in matches
             ]
         }
+
+
+@app.get("/translations/")
+def get_translations():
+    translations = get_all_translations()
+    return {"translations": [{"code": t.code, "name": t.name} for t in translations]}
