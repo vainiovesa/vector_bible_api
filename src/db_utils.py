@@ -19,9 +19,15 @@ MODEL = "text-embedding-3-small"
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 
-def get_embedding(text):
+def get_embedding(text: str):
     text = text.replace("\n", " ")
     return client.embeddings.create(input = [text], model=MODEL).data[0].embedding
+
+
+def get_embeddings(texts: list):
+    normalized_texts = [text.replace("\n", " ") for text in texts]
+    response = client.embeddings.create(input=normalized_texts, model=MODEL)
+    return [item.embedding for item in response.data]
 
 
 def search_verses(text:str, translation:str, limit:int=5, max_distance:float=0.75):
