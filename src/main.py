@@ -1,11 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
 from db_utils import search_verses, TranslationNotFoundError, get_all_translations
-
-
-class QueryModel(BaseModel):
-    query: str
-    translation: str
 
 
 app = FastAPI()
