@@ -4,8 +4,6 @@ import sys
 from pathlib import Path
 from typing import Iterable
 
-from sqlalchemy import delete
-
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 SRC_DIR = PROJECT_ROOT / "src"
 if str(SRC_DIR) not in sys.path:
@@ -13,6 +11,7 @@ if str(SRC_DIR) not in sys.path:
 
 from db import create_tables, sessionlocal
 from db_utils import get_embedding
+from clear_mock_translations import clear_mock_translations
 from models import BibleVerse, Translation
 
 
@@ -38,15 +37,9 @@ MOCK_TRANSLATIONS = [
 ]
 
 
-def clear_mock_data() -> None:
-    with sessionlocal.begin() as session:
-        session.execute(delete(BibleVerse))
-        session.execute(delete(Translation))
-
-
 def seed_mock_data() -> None:
     create_tables()
-    clear_mock_data()
+    clear_mock_translations()
 
     with sessionlocal.begin() as session:
         for translation_data in MOCK_TRANSLATIONS:
