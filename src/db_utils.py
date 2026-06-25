@@ -55,33 +55,20 @@ def search_verses(text:str, translation:str, book:str=None, limit:int=5, offset:
         embedding = get_embedding(text)
         distance = BibleVerse.embedding.cosine_distance(embedding)
 
+        stmt = (
+            select(BibleVerse, distance.label("distance"))
+            .join(Translation)
+            .options(joinedload(BibleVerse.translation))
+            .where(
+                distance < max_distance,
+                Translation.code == translation,
+            )
+        )
+
         if book:
-            stmt = (
-                select(BibleVerse, distance.label("distance"))
-                .join(Translation)
-                .options(joinedload(BibleVerse.translation))
-                .order_by(distance)
-                .limit(limit)
-                .where(
-                    distance < max_distance,
-                    Translation.code == translation,
-                    BibleVerse.book == book
-                )
-                .offset(offset)
-            )
-        else:
-            stmt = (
-                select(BibleVerse, distance.label("distance"))
-                .join(Translation)
-                .options(joinedload(BibleVerse.translation))
-                .order_by(distance)
-                .limit(limit)
-                .where(
-                    distance < max_distance,
-                    Translation.code == translation
-                )
-                .offset(offset)
-            )
+            stmt = stmt.where(BibleVerse.book == book)
+        
+        stmt = stmt.order_by(distance).limit(limit).offset(offset)
 
         results = session.execute(stmt).all()
 
