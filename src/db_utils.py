@@ -30,12 +30,14 @@ def get_embedding(text: str):
 
     text = text.replace("\n", " ")
     embedding = client.embeddings.create(input = [text], model=MODEL).data[0].embedding
+
     try:
         store_embedding(text, embedding)
     except Exception as e:
         print(f"Error storing embedding in cache: {e}")
 
     return embedding
+
 
 def get_embeddings(texts: list):
     normalized_texts = [text.replace("\n", " ") for text in texts]
@@ -71,13 +73,6 @@ def search_verses(text:str, translation:str, limit:int=5, offset:int=0, max_dist
         results = session.execute(stmt).all()
 
         return results
-
-
-def get_all_verses():
-    with sessionlocal() as session:
-        return session.scalars(
-            select(BibleVerse).options(joinedload(BibleVerse.translation))
-        ).all()
 
 
 def get_all_translations():
