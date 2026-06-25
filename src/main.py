@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from db_utils import search_verses, TranslationNotFoundError, get_all_translations
+from db_utils import search_verses, TranslationNotFoundError, get_all_translations, get_all_books
 
 
 app = FastAPI()
@@ -34,3 +34,9 @@ def closest_matches(query: str, translation: str, limit: int = 5, offset: int = 
 def get_translations():
     translations = get_all_translations()
     return {"translations": [{"code": t.code, "name": t.name} for t in translations]}
+
+
+@app.get("/books/")
+def get_books():
+    books = get_all_books()
+    return [{"name": book} for book in books]

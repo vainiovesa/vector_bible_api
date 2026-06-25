@@ -72,5 +72,12 @@ def get_all_translations():
         return session.scalars(select(Translation)).all()
 
 
+def get_all_books():
+    with sessionlocal() as session:
+        return session.scalars(
+            select(BibleVerse.book).distinct()
+        ).all()
+
+
 class TranslationNotFoundError(Exception):
     pass
