@@ -6,8 +6,8 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "${POSTGRES_PORT}:5432"
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -21,8 +21,8 @@ services:
   cache:
     image: redis:7
     restart: unless-stopped
-    ports:
-      - "${REDIS_PORT}:6379"
+    expose:
+      - "6379"
 
   app:
     build:
@@ -32,12 +32,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      cache:
+        condition: service_started
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_HOST: db
       POSTGRES_PORT: 5432
       POSTGRES_DB: ${POSTGRES_DB}
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     ports:
       - "8000:8000"

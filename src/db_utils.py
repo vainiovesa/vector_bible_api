@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from db import sessionlocal
 from models import BibleVerse, Translation
+from cache import get_embedding_from_cache, store_embedding
 
 
 load_dotenv() 
@@ -20,9 +21,21 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 def get_embedding(text: str):
-    text = text.replace("\n", " ")
-    return client.embeddings.create(input = [text], model=MODEL).data[0].embedding
+    try:
+        cached_embedding = get_embedding_from_cache(text)
+        if cached_embedding is not None:
+            return cached_embedding
+    except Exception as e:
+        print(f"Error retrieving embedding from cache: {e}")
 
+    text = text.replace("\n", " ")
+    embedding = client.embeddings.create(input = [text], model=MODEL).data[0].embedding
+    try:
+        store_embedding(text, embedding)
+    except Exception as e:
+        print(f"Error storing embedding in cache: {e}")
+
+    return embedding
 
 def get_embeddings(texts: list):
     normalized_texts = [text.replace("\n", " ") for text in texts]
