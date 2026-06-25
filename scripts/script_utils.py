@@ -65,12 +65,7 @@ def build_verse_rows(translation_code: str, translation_id: int, book_data: dict
             )
 
     for row_batch in chunked(verse_rows, BATCH_SIZE):
-        embeddings = get_embeddings(
-            [
-                f"{translation_code}:{row['book']}:{row['chapter']}:{row['verse']}:{row['text']}"
-                for row in row_batch
-            ]
-        )
+        embeddings = get_embeddings([row["text"] for row in row_batch])
         for row, embedding in zip(row_batch, embeddings, strict=True):
             row["embedding"] = embedding
 
