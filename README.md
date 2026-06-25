@@ -31,7 +31,7 @@ docker compose run --rm app python scripts/import_en_kjv.py
 Example request:
 
 ```
-GET http://localhost:8000/closest_matches/?query=Mathematics&translation=en_kjv&limit=3&offset=0&max_distance=0.8
+GET http://localhost:8000/closest_matches/?query=Mathematics&translation=en_kjv&book=Job&limit=3&offset=0&max_distance=0.8
 ```
 
 Example response:
@@ -40,30 +40,31 @@ Example response:
 {
   "query": "Mathematics",
   "translation": "en_kjv",
+  "book": "Job",
   "limit": 3,
   "offset": 0,
   "max_distance": 0.8,
   "matches": [
     {
-      "book": "Isaiah",
-      "chapter": 40,
-      "verse": 12,
-      "text": "Who hath measured the waters in the hollow of his hand, and meted out heaven with the span, and comprehended the dust of the earth in a measure, and weighed the mountains in scales, and the hills in a balance? {a measure: Heb. a tierce}",
-      "distance": 0.7272699238532204
-    },
-    {
-      "book": "Ephesians",
-      "chapter": 3,
-      "verse": 18,
-      "text": "May be able to comprehend with all saints what {is} the breadth, and length, and depth, and height;",
-      "distance": 0.7272764369720994
-    },
-    {
       "book": "Job",
       "chapter": 38,
       "verse": 5,
       "text": "Who hath laid the measures thereof, if thou knowest? or who hath stretched the line upon it?",
-      "distance": 0.7540155133216047
+      "distance": 0.7540748407080997
+    },
+    {
+      "book": "Job",
+      "chapter": 37,
+      "verse": 16,
+      "text": "Dost thou know the balancings of the clouds, the wondrous works of him which is perfect in knowledge?",
+      "distance": 0.7556383546062414
+    },
+    {
+      "book": "Job",
+      "chapter": 38,
+      "verse": 18,
+      "text": "Hast thou perceived the breadth of the earth? declare if thou knowest it all.",
+      "distance": 0.7662918544073322
     }
   ]
 }
@@ -73,6 +74,7 @@ Example response:
 |----------------|---------|----------|---------|-------------|
 | `query`        | string  | Yes      | —       | Natural language query |
 | `translation`  | string  | Yes      | —       | Bible translation code (e.g. `en_kjv`, `fi_1776`) |
+| `book`         | string  | No       | —       | Book from which to search |
 | `limit`        | integer | No       | 5       | Maximum number of verse matches to return |
 | `offset`       | integer | No       | 0       | Pagination offset |
 | `max_distance` | float   | No       | 0.75    | Maximum vector distance (lower = results more similar to the query) |
