@@ -36,3 +36,17 @@ class BibleVerse(Base):
 	__table_args__ = (
 		UniqueConstraint("translation_id", "book", "chapter", "verse", name="uq_bible_verse_reference"),
 	)
+
+
+class BibleChunk(Base):
+	__tablename__ = "bible_chunks"
+
+	id = Column(Integer, primary_key=True, index=True)
+	begin_verse_id = Column(Integer, ForeignKey("bible_verses.id", ondelete="CASCADE"), nullable=False, index=True)
+	end_verse_id = Column(Integer, ForeignKey("bible_verses.id", ondelete="CASCADE"), nullable=False, index=True)
+	embedding = Column(VECTOR(EMBEDDING_DIMENSIONS), nullable=False)
+	created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+	__table_args__ = (
+		UniqueConstraint("begin_verse_id", "end_verse_id", name="uq_bible_chunk_reference"),
+	)
