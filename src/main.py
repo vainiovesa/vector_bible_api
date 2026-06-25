@@ -6,15 +6,16 @@ app = FastAPI()
 
 
 @app.get("/closest_matches/")
-def closest_matches(query: str, translation: str, limit: int = 5, max_distance: float = 0.75):
+def closest_matches(query: str, translation: str, limit: int = 5, offset: int = 0, max_distance: float = 0.75):
     try:
-        matches = search_verses(query, translation, limit, max_distance)
+        matches = search_verses(query, translation, limit, offset, max_distance)
     except TranslationNotFoundError as e:
         return {"error": str(e)}
 
     return {"query": query,
             "translation": translation,
             "limit": limit,
+            "offset": offset,
             "max_distance": max_distance,
             "matches": [
                 {

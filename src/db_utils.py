@@ -30,7 +30,7 @@ def get_embeddings(texts: list):
     return [item.embedding for item in response.data]
 
 
-def search_verses(text:str, translation:str, limit:int=5, max_distance:float=0.75):
+def search_verses(text:str, translation:str, limit:int=5, offset:int=0, max_distance:float=0.75):
     with sessionlocal() as session:
         translation_exists = session.scalar(
             select(Translation.id).where(Translation.code == translation)
@@ -52,6 +52,7 @@ def search_verses(text:str, translation:str, limit:int=5, max_distance:float=0.7
                 distance < max_distance,
                 Translation.code == translation
             )
+            .offset(offset)
         )
 
         results = session.execute(stmt).all()
