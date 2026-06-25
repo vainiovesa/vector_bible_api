@@ -45,34 +45,71 @@ def get_embeddings(texts: list):
     return [item.embedding for item in response.data]
 
 
-def search_verses(text:str, translation:str, limit:int=5, offset:int=0, max_distance:float=0.75):
+def search_verses(text:str, translation:str, book:str=None, limit:int=5, offset:int=0, max_distance:float=0.75):
     with sessionlocal() as session:
-        translation_exists = session.scalar(
-            select(Translation.id).where(Translation.code == translation)
-        )
+        check_translation_exists(session, translation)
 
-        if translation_exists is None:
-            raise TranslationNotFoundError(f"Translation code not found: {translation}")
+        if book:
+            check_book_exists(session, translation, book)
 
         embedding = get_embedding(text)
         distance = BibleVerse.embedding.cosine_distance(embedding)
 
-        stmt = (
-            select(BibleVerse, distance.label("distance"))
-            .join(Translation)
-            .options(joinedload(BibleVerse.translation))
-            .order_by(distance)
-            .limit(limit)
-            .where(
-                distance < max_distance,
-                Translation.code == translation
+        if book:
+            stmt = (
+                select(BibleVerse, distance.label("distance"))
+                .join(Translation)
+                .options(joinedload(BibleVerse.translation))
+                .order_by(distance)
+                .limit(limit)
+                .where(
+                    distance < max_distance,
+                    Translation.code == translation,
+                    BibleVerse.book == book
+                )
+                .offset(offset)
             )
-            .offset(offset)
-        )
+        else:
+            stmt = (
+                select(BibleVerse, distance.label("distance"))
+                .join(Translation)
+                .options(joinedload(BibleVerse.translation))
+                .order_by(distance)
+                .limit(limit)
+                .where(
+                    distance < max_distance,
+                    Translation.code == translation
+                )
+                .offset(offset)
+            )
 
         results = session.execute(stmt).all()
 
         return results
+
+
+def check_translation_exists(session, translation:str):
+    translation_exists = session.scalar(
+        select(Translation.id).where(Translation.code == translation)
+    )
+
+    if translation_exists is None:
+        raise TranslationNotFoundError(f"Translation code not found: {translation}")
+
+
+def check_book_exists(session, translation:str, book:str):
+    translation_id = session.scalar(
+        select(Translation.id).where(Translation.code == translation)
+    )
+
+    book_exists = session.scalar(
+        select(BibleVerse.id).where(
+            BibleVerse.book == book,
+            BibleVerse.translation_id == translation_id
+        )
+    )
+    if book_exists is None:
+        raise BookNotFoundError(f"Book not found: {book}")
 
 
 def get_all_translations():
@@ -88,4 +125,8 @@ def get_all_books():
 
 
 class TranslationNotFoundError(Exception):
+    pass
+
+
+class BookNotFoundError(Exception):
     pass

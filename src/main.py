@@ -1,19 +1,22 @@
 from fastapi import FastAPI
-from db_utils import search_verses, TranslationNotFoundError, get_all_translations, get_all_books
+from db_utils import search_verses, get_all_translations, get_all_books, TranslationNotFoundError, BookNotFoundError
 
 
 app = FastAPI()
 
 
 @app.get("/closest_matches/")
-def closest_matches(query: str, translation: str, limit: int = 5, offset: int = 0, max_distance: float = 0.75):
+def closest_matches(query: str, translation: str, book: str = None, limit: int = 5, offset: int = 0, max_distance: float = 0.75):
     try:
-        matches = search_verses(query, translation, limit, offset, max_distance)
+        matches = search_verses(query, translation, book, limit, offset, max_distance)
     except TranslationNotFoundError as e:
+        return {"error": str(e)}
+    except BookNotFoundError as e:
         return {"error": str(e)}
 
     return {"query": query,
             "translation": translation,
+            "book": book,
             "limit": limit,
             "offset": offset,
             "max_distance": max_distance,
