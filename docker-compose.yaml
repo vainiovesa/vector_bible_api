@@ -18,6 +18,12 @@ services:
       timeout: 5s
       retries: 5
 
+  cache:
+    image: redis:7
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:6379"
+
   app:
     build:
       context: .
