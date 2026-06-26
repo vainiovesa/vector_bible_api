@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
 from db import sessionlocal
 from models import BibleVerse, Translation, BibleChunk
@@ -163,11 +163,19 @@ def translation_is_chunked(translation_code:str) -> bool:
         return chunk_exists is not None
 
 
-def get_all_books():
+def get_books_of_translation(translation_code:str) -> list[str]:
     with sessionlocal() as session:
-        return session.scalars(
-            select(BibleVerse.book).distinct()
+        translation = session.scalar(
+            select(Translation).where(Translation.code == translation_code)
+        )
+
+        books = session.scalars(
+            select(BibleVerse.book)
+            .where(BibleVerse.translation_id == translation.id)
+            .distinct()
         ).all()
+
+        return books
 
 
 class TranslationNotFoundError(Exception):
