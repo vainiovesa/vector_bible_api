@@ -4,7 +4,7 @@ from openai import OpenAI
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from db import sessionlocal
-from models import BibleVerse, Translation
+from models import BibleVerse, Translation, BibleChunk
 from cache import get_embedding_from_cache, store_embedding
 
 
@@ -73,6 +73,49 @@ def search_verses(text:str, translation:str, book:str=None, limit:int=5, offset:
         results = session.execute(stmt).all()
 
         return results
+
+
+def search_chunks(text:str, translation:str, book:str=None, limit:int=5, offset:int=0, max_distance:float=0.75):
+    with sessionlocal() as session:
+        check_translation_exists(session, translation)
+
+        if book:
+            check_book_exists(session, translation, book)
+
+        embedding = get_embedding(text)
+        distance = BibleChunk.embedding.cosine_distance(embedding)
+
+        stmt = (
+            select(BibleChunk, distance.label("distance"))
+            .join(BibleVerse, BibleChunk.begin_verse_id == BibleVerse.id)
+            .join(Translation, BibleVerse.translation_id == Translation.id)
+            .where(
+                distance < max_distance,
+                Translation.code == translation,
+            )
+        )
+
+        if book:
+            stmt = stmt.where(BibleVerse.book == book)
+
+        stmt = stmt.order_by(distance).limit(limit).offset(offset)
+
+        results = session.execute(stmt).all()
+
+        return results
+
+
+def verses_of_chunk(chunk:BibleChunk):
+    with sessionlocal() as session:
+        verses = session.scalars(
+            select(BibleVerse)
+            .where(
+                BibleVerse.id >= chunk.begin_verse_id,
+                BibleVerse.id <= chunk.end_verse_id
+            )
+            .order_by(BibleVerse.id)
+        ).all()
+        return verses
 
 
 def check_translation_exists(session, translation:str):
