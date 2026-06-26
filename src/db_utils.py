@@ -147,6 +147,22 @@ def get_all_translations():
         return session.scalars(select(Translation)).all()
 
 
+def translation_is_chunked(translation_code:str) -> bool:
+    with sessionlocal() as session:
+        translation = session.scalar(
+            select(Translation).where(Translation.code == translation_code)
+        )
+
+        chunk_exists = session.scalar(
+            select(BibleChunk.id)
+            .join(BibleVerse, BibleChunk.begin_verse_id == BibleVerse.id)
+            .where(BibleVerse.translation_id == translation.id)
+            .limit(1)
+        )
+
+        return chunk_exists is not None
+
+
 def get_all_books():
     with sessionlocal() as session:
         return session.scalars(

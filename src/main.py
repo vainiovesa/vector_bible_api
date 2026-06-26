@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from db_utils import search_verses, get_all_translations, get_all_books, search_chunks, verses_of_chunk, TranslationNotFoundError, BookNotFoundError
+from db_utils import search_verses, get_all_translations, translation_is_chunked, get_all_books, search_chunks, verses_of_chunk, TranslationNotFoundError, BookNotFoundError
 
 
 app = FastAPI()
@@ -72,7 +72,16 @@ def closest_chunks(query: str, translation: str, book: str = None, limit: int = 
 @app.get("/translations/")
 def get_translations():
     translations = get_all_translations()
-    return {"translations": [{"code": t.code, "name": t.name} for t in translations]}
+    return {
+        "translations": [
+            {
+                "code": t.code,
+                "name": t.name,
+                "chunked": translation_is_chunked(t.code)
+            }
+            for t in translations
+        ]
+    }
 
 
 @app.get("/books/")
