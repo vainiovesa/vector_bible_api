@@ -23,8 +23,17 @@ The API will be available on `http://localhost:8000`.
 
 ```bash
 docker compose run --rm app python scripts/import_fi_1776.py
+```
+```bash
 docker compose run --rm app python scripts/import_en_kjv.py
 ```
+
+### Chunk embedding
+
+```bash
+docker compose run --rm app python scripts/embed_translation_chunks.py en_kjv
+```
+With chunk size of 5 and rolling window step of 2 as default. Can be customized with `--chunk-size` and `--window-step`.
 
 ## How to use?
 
