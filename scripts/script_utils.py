@@ -47,7 +47,7 @@ def delete_existing_verses(session, translation_id: int, translation_code: str) 
     session.execute(delete(BibleVerse).where(BibleVerse.translation_id == translation_id))
 
 
-def build_verse_rows(translation_code: str, translation_id: int, book_data: dict[str, Any]) -> list[dict[str, Any]]:
+def build_verse_rows(translation_id: int, book_data: dict[str, Any]) -> list[dict[str, Any]]:
     book_name = book_data["name"]
     verse_rows = []
 
@@ -76,7 +76,7 @@ def import_book(session, translation: Translation, book_index: int, total_books:
     book_name = book_data["name"]
     print(f"Importing book {book_index}/{total_books}: {book_name}", flush=True)
 
-    verse_rows = build_verse_rows(translation.code, translation.id, book_data)
+    verse_rows = build_verse_rows(translation.id, book_data)
     for row_batch in chunked(verse_rows, BATCH_SIZE):
         session.execute(insert(BibleVerse), row_batch)
 
