@@ -1,5 +1,5 @@
 from pgvector.sqlalchemy import VECTOR
-from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint, Boolean, func
 from sqlalchemy.orm import relationship
 
 from db import Base
@@ -49,4 +49,17 @@ class BibleChunk(Base):
 
 	__table_args__ = (
 		UniqueConstraint("begin_verse_id", "end_verse_id", name="uq_bible_chunk_reference"),
+	)
+
+
+class Book(Base):
+	__tablename__ = "books"
+
+	name = Column(String(64), primary_key=True)
+	canonical_order = Column(Integer, nullable=False)
+	old_testament = Column(Boolean, nullable=False)
+	created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+
+	__table_args__ = (
+		UniqueConstraint("name", name="uq_book_name"),
 	)

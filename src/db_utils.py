@@ -1,10 +1,10 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 from db import sessionlocal
-from models import BibleVerse, Translation, BibleChunk
+from models import BibleVerse, Translation, BibleChunk, Book
 from cache import get_embedding_from_cache, store_embedding
 
 
@@ -169,11 +169,25 @@ def get_books_of_translation(translation_code:str) -> list[str]:
             select(Translation).where(Translation.code == translation_code)
         )
 
-        books = session.scalars(
-            select(BibleVerse.book)
-            .where(BibleVerse.translation_id == translation.id)
-            .distinct()
-        ).all()
+        ordering_exists = session.scalar(select(Book.name).limit(1)) is not None
+
+        if ordering_exists:
+            stmt = (
+                select(BibleVerse.book, Book.canonical_order)
+                .join(Book, Book.name == BibleVerse.book)
+                .where(BibleVerse.translation_id == translation.id)
+                .distinct()
+                .order_by(Book.canonical_order)
+            )
+        else:
+            stmt = (
+                select(BibleVerse.book)
+                .where(BibleVerse.translation_id == translation.id)
+                .distinct()
+                .order_by(BibleVerse.book)
+            )
+
+        books = session.scalars(stmt).all()
 
         return books
 

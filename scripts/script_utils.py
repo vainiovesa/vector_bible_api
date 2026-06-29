@@ -15,7 +15,7 @@ if str(SRC_DIR) not in sys.path:
 
 from db import create_tables, sessionlocal
 from db_utils import get_embeddings
-from models import BibleVerse, Translation
+from models import BibleVerse, Translation, Book
 
 
 BATCH_SIZE = 64
@@ -45,6 +45,11 @@ def chunked(items: list[dict[str, Any]], size: int):
 def delete_existing_verses(session, translation_id: int, translation_code: str) -> None:
     print(f"Removing existing {translation_code} verses...", flush=True)
     session.execute(delete(BibleVerse).where(BibleVerse.translation_id == translation_id))
+
+
+def delete_existing_book_ordering(session):
+    print("Removing existing book ordering...", flush=True)
+    session.execute(delete(Book))
 
 
 def build_verse_rows(translation_id: int, book_data: dict[str, Any]) -> list[dict[str, Any]]:

@@ -1,0 +1,67 @@
+Order,Book,Testament
+1,Genesis,Old
+2,Exodus,Old
+3,Leviticus,Old
+4,Numbers,Old
+5,Deuteronomy,Old
+6,Joshua,Old
+7,Judges,Old
+8,Ruth,Old
+9,1 Samuel,Old
+10,2 Samuel,Old
+11,1 Kings,Old
+12,2 Kings,Old
+13,1 Chronicles,Old
+14,2 Chronicles,Old
+15,Ezra,Old
+16,Nehemiah,Old
+17,Esther,Old
+18,Job,Old
+19,Psalms,Old
+20,Proverbs,Old
+21,Ecclesiastes,Old
+22,Song of Solomon,Old
+23,Isaiah,Old
+24,Jeremiah,Old
+25,Lamentations,Old
+26,Ezekiel,Old
+27,Daniel,Old
+28,Hosea,Old
+29,Joel,Old
+30,Amos,Old
+31,Obadiah,Old
+32,Jonah,Old
+33,Micah,Old
+34,Nahum,Old
+35,Habakkuk,Old
+36,Zephaniah,Old
+37,Haggai,Old
+38,Zechariah,Old
+39,Malachi,Old
+40,Matthew,New
+41,Mark,New
+42,Luke,New
+43,John,New
+44,Acts,New
+45,Romans,New
+46,1 Corinthians,New
+47,2 Corinthians,New
+48,Galatians,New
+49,Ephesians,New
+50,Philippians,New
+51,Colossians,New
+52,1 Thessalonians,New
+53,2 Thessalonians,New
+54,1 Timothy,New
+55,2 Timothy,New
+56,Titus,New
+57,Philemon,New
+58,Hebrews,New
+59,James,New
+60,1 Peter,New
+61,2 Peter,New
+62,1 John,New
+63,2 John,New
+64,3 John,New
+65,Jude,New
+66,Revelation,New
