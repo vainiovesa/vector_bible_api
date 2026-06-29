@@ -1,8 +1,11 @@
 # Vector Bible API
 
-## What?
+## What is it?
 
 This project provides a REST API for semantic search of verses and passages from multiple Bible translations. Instead of keyword matches, it uses vector embeddings and similarity search to find passages related to a user's query. This allows developers to build applications that find relevant scripture from natural language sentences.
+
+> [!NOTE]
+> The software is licensed under the MIT License. Bible texts, embeddings, and other imported datasets may be subject to separate licenses. This repository includes import scripts for public-domain translations. Users are responsible for ensuring they have the necessary rights to use and distribute any additional translations they import.
 
 ## Why?
 
