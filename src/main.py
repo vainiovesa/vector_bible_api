@@ -10,7 +10,9 @@ from db_utils import (
     search_chunks,
     verses_of_chunk,
     TranslationNotFoundError,
-    BookNotFoundError
+    TestamentNotFoundError,
+    BookNotFoundError,
+    FilterOptionError
 )
 
 
@@ -18,16 +20,20 @@ app = FastAPI()
 
 
 @app.get("/closest_matches/")
-def closest_matches(query: str, translation: str, book: str = None, limit: int = 5, offset: int = 0, max_distance: float = 0.75):
+def closest_matches(query: str, translation: str, testament: str = None, book: str = None, limit: int = 5, offset: int = 0, max_distance: float = 0.75):
     try:
-        matches = search_verses(query, translation, book, limit, offset, max_distance)
-    except TranslationNotFoundError as e:
-        return {"error": str(e)}
-    except BookNotFoundError as e:
+        matches = search_verses(query, translation, testament, book, limit, offset, max_distance)
+    except (
+        TranslationNotFoundError,
+        TestamentNotFoundError,
+        BookNotFoundError,
+        FilterOptionError
+    ) as e:
         return {"error": str(e)}
 
     return {"query": query,
             "translation": translation,
+            "testament": testament,
             "book": book,
             "limit": limit,
             "offset": offset,
@@ -46,12 +52,15 @@ def closest_matches(query: str, translation: str, book: str = None, limit: int =
 
 
 @app.get("/closest_chunks/")
-def closest_chunks(query: str, translation: str, book: str = None, limit: int = 5, offset: int = 0, max_distance: float = 0.75):
+def closest_chunks(query: str, translation: str, testament: str = None, book: str = None, limit: int = 5, offset: int = 0, max_distance: float = 0.75):
     try:
-        matches = search_chunks(query, translation, book, limit, offset, max_distance)
-    except TranslationNotFoundError as e:
-        return {"error": str(e)}
-    except BookNotFoundError as e:
+        matches = search_chunks(query, translation, testament, book, limit, offset, max_distance)
+    except (
+        TranslationNotFoundError,
+        TestamentNotFoundError,
+        BookNotFoundError,
+        FilterOptionError
+    ) as e:
         return {"error": str(e)}
 
     result = []

@@ -45,9 +45,12 @@ def get_embeddings(texts: list):
     return [item.embedding for item in response.data]
 
 
-def search_verses(text:str, translation:str, book:str=None, limit:int=5, offset:int=0, max_distance:float=0.75):
+def search_verses(text:str, translation:str, testament:str=None, book:str=None, limit:int=5, offset:int=0, max_distance:float=0.75):
     with sessionlocal() as session:
         check_translation_exists(session, translation)
+
+        if testament:
+            check_if_can_be_filtered_by_testament(session, testament)
 
         if book:
             check_book_exists(session, book, translation)
@@ -65,9 +68,13 @@ def search_verses(text:str, translation:str, book:str=None, limit:int=5, offset:
             )
         )
 
+        if testament:
+            books_of_testament = get_books_of_testament(session, testament)
+            stmt = stmt.where(BibleVerse.book.in_(books_of_testament))
+
         if book:
             stmt = stmt.where(BibleVerse.book == book)
-        
+
         stmt = stmt.order_by(distance).limit(limit).offset(offset)
 
         results = session.execute(stmt).all()
@@ -75,9 +82,12 @@ def search_verses(text:str, translation:str, book:str=None, limit:int=5, offset:
         return results
 
 
-def search_chunks(text:str, translation:str, book:str=None, limit:int=5, offset:int=0, max_distance:float=0.75):
+def search_chunks(text:str, translation:str, testament:str=None, book:str=None, limit:int=5, offset:int=0, max_distance:float=0.75):
     with sessionlocal() as session:
         check_translation_exists(session, translation)
+
+        if testament:
+            check_if_can_be_filtered_by_testament(session, testament)
 
         if book:
             check_book_exists(session, book, translation)
@@ -94,6 +104,10 @@ def search_chunks(text:str, translation:str, book:str=None, limit:int=5, offset:
                 Translation.code == translation,
             )
         )
+
+        if testament:
+            books_of_testament = get_books_of_testament(session, testament)
+            stmt = stmt.where(BibleVerse.book.in_(books_of_testament))
 
         if book:
             stmt = stmt.where(BibleVerse.book == book)
@@ -124,7 +138,15 @@ def check_translation_exists(session, translation_code:str):
     )
 
     if translation_exists is None:
-        raise TranslationNotFoundError(f"Translation code not found: {translation_code}")
+        raise TranslationNotFoundError(f"Translation code not found: '{translation_code}'")
+
+
+def check_if_can_be_filtered_by_testament(session, testament):
+    if testament not in ("old", "new"):
+        raise TestamentNotFoundError(f"Testament not found: '{testament}', options: ('old', 'new').")
+
+    if not ordering_exists(session):
+        raise FilterOptionError(f"Book ordering table empty; testament cannot be determined.")
 
 
 def check_book_exists(session, book:str, translation:str=None):
@@ -140,7 +162,7 @@ def check_book_exists(session, book:str, translation:str=None):
     book_exists = session.scalar(stmt)
 
     if book_exists is None:
-        raise BookNotFoundError(f"Book not found: {book}")
+        raise BookNotFoundError(f"Book not found: '{book}'")
 
 
 def get_all_translations():
@@ -174,9 +196,7 @@ def get_books_of_translation(translation_code:str) -> list[str]:
             select(Translation).where(Translation.code == translation_code)
         )
 
-        ordering_exists = session.scalar(select(Book.name).limit(1)) is not None
-
-        if ordering_exists:
+        if ordering_exists(session):
             stmt = (
                 select(BibleVerse.book, Book.canonical_order)
                 .join(Book, Book.name == BibleVerse.book)
@@ -195,6 +215,14 @@ def get_books_of_translation(translation_code:str) -> list[str]:
         books = session.scalars(stmt).all()
 
         return books
+
+
+def get_books_of_testament(session, testament):
+    old_testament = testament == "old"
+    return session.scalars(
+        select(Book.name)
+        .where(Book.old_testament == old_testament)
+    )
 
 
 def get_name_of_translation(translation_code:str):
@@ -238,9 +266,21 @@ def get_testament_of_book(book:str):
         return "new"
 
 
+def ordering_exists(session):
+    return session.scalar(select(Book.name).limit(1)) is not None
+
+
 class TranslationNotFoundError(Exception):
     pass
 
 
+class TestamentNotFoundError(Exception):
+    pass
+
+
 class BookNotFoundError(Exception):
+    pass
+
+
+class FilterOptionError(Exception):
     pass
