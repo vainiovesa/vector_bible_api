@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import joinedload
 from db import sessionlocal
 from models import BibleVerse, Translation, BibleChunk, Book
@@ -50,7 +50,7 @@ def search_verses(text:str, translation:str, book:str=None, limit:int=5, offset:
         check_translation_exists(session, translation)
 
         if book:
-            check_book_exists(session, translation, book)
+            check_book_exists(session, book, translation)
 
         embedding = get_embedding(text)
         distance = BibleVerse.embedding.cosine_distance(embedding)
@@ -80,7 +80,7 @@ def search_chunks(text:str, translation:str, book:str=None, limit:int=5, offset:
         check_translation_exists(session, translation)
 
         if book:
-            check_book_exists(session, translation, book)
+            check_book_exists(session, book, translation)
 
         embedding = get_embedding(text)
         distance = BibleChunk.embedding.cosine_distance(embedding)
@@ -118,26 +118,27 @@ def verses_of_chunk(chunk:BibleChunk):
         return verses
 
 
-def check_translation_exists(session, translation:str):
+def check_translation_exists(session, translation_code:str):
     translation_exists = session.scalar(
-        select(Translation.id).where(Translation.code == translation)
+        select(Translation.id).where(Translation.code == translation_code)
     )
 
     if translation_exists is None:
-        raise TranslationNotFoundError(f"Translation code not found: {translation}")
+        raise TranslationNotFoundError(f"Translation code not found: {translation_code}")
 
 
-def check_book_exists(session, translation:str, book:str):
+def check_book_exists(session, book:str, translation:str=None):
     translation_id = session.scalar(
         select(Translation.id).where(Translation.code == translation)
     )
 
-    book_exists = session.scalar(
-        select(BibleVerse.id).where(
-            BibleVerse.book == book,
-            BibleVerse.translation_id == translation_id
-        )
-    )
+    stmt = select(BibleVerse.id).where(BibleVerse.book == book)
+
+    if translation:
+        stmt = stmt.where(BibleVerse.translation_id == translation_id)
+
+    book_exists = session.scalar(stmt)
+
     if book_exists is None:
         raise BookNotFoundError(f"Book not found: {book}")
 
@@ -149,6 +150,8 @@ def get_all_translations():
 
 def translation_is_chunked(translation_code:str) -> bool:
     with sessionlocal() as session:
+        check_translation_exists(session, translation_code)
+
         translation = session.scalar(
             select(Translation).where(Translation.code == translation_code)
         )
@@ -165,6 +168,8 @@ def translation_is_chunked(translation_code:str) -> bool:
 
 def get_books_of_translation(translation_code:str) -> list[str]:
     with sessionlocal() as session:
+        check_translation_exists(session, translation_code)
+
         translation = session.scalar(
             select(Translation).where(Translation.code == translation_code)
         )
@@ -190,6 +195,47 @@ def get_books_of_translation(translation_code:str) -> list[str]:
         books = session.scalars(stmt).all()
 
         return books
+
+
+def get_name_of_translation(translation_code:str):
+    with sessionlocal() as session:
+        check_translation_exists(session, translation_code)
+
+        name = session.scalar(
+            select(Translation.name).where(Translation.code == translation_code)
+        )
+
+        return name
+
+
+def get_number_of_verses(translation_code:str):
+    with sessionlocal() as session:
+        check_translation_exists(session, translation_code)
+
+        translation_id = session.scalar(
+            select(Translation.id).where(Translation.code == translation_code)
+        )
+
+        num = session.scalar(
+            select(func.count(BibleVerse.id))
+            .where(BibleVerse.translation_id == translation_id)
+        )
+
+        return num
+
+
+def get_testament_of_book(book:str):
+    with sessionlocal() as session:
+        is_old_testament = session.scalar(
+            select(Book.old_testament).where(Book.name == book)
+        )
+
+        if is_old_testament is None:
+            return
+
+        if is_old_testament:
+            return "old"
+        return "new"
 
 
 class TranslationNotFoundError(Exception):
