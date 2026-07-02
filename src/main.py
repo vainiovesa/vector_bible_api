@@ -12,7 +12,8 @@ from db_utils import (
     TranslationNotFoundError,
     TestamentNotFoundError,
     BookNotFoundError,
-    FilterOptionError
+    FilterOptionError,
+    NotChunkedError
 )
 
 
@@ -59,7 +60,8 @@ def closest_chunks(query: str, translation: str, testament: str = None, book: st
         TranslationNotFoundError,
         TestamentNotFoundError,
         BookNotFoundError,
-        FilterOptionError
+        FilterOptionError,
+        NotChunkedError
     ) as e:
         return {"error": str(e)}
 

@@ -85,6 +85,7 @@ def search_verses(text:str, translation:str, testament:str=None, book:str=None, 
 def search_chunks(text:str, translation:str, testament:str=None, book:str=None, limit:int=5, offset:int=0, max_distance:float=0.75):
     with sessionlocal() as session:
         check_translation_exists(session, translation)
+        check_translation_is_chunked(translation)
 
         if testament:
             check_if_can_be_filtered_by_testament(session, testament)
@@ -188,6 +189,11 @@ def translation_is_chunked(translation_code:str) -> bool:
         return chunk_exists is not None
 
 
+def check_translation_is_chunked(translation_code):
+    if not translation_is_chunked(translation_code):
+        raise NotChunkedError(f"Translation is not chunked: '{translation_code}'")
+
+
 def get_books_of_translation(translation_code:str) -> list[str]:
     with sessionlocal() as session:
         check_translation_exists(session, translation_code)
@@ -283,4 +289,8 @@ class BookNotFoundError(Exception):
 
 
 class FilterOptionError(Exception):
+    pass
+
+
+class NotChunkedError(Exception):
     pass
