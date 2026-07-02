@@ -84,6 +84,7 @@ def closest_chunks(query: str, translation: str, testament: str = None, book: st
     return {
         "query": query,
         "translation": translation,
+        "testament": testament,
         "book": book,
         "limit": limit,
         "offset": offset,
