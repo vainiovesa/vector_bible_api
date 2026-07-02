@@ -93,6 +93,63 @@ Example response:
 }
 ```
 
+Example request:
+
+```
+GET http://localhost:8000/closest_chunks/?query=Jesus%20in%20Jerusalem&translation=en_kjv&testament=new&limit=1&offset=0&max_distance=0.75
+```
+
+Example response:
+
+```json
+{
+  "query": "Jesus in Jerusalem",
+  "translation": "en_kjv",
+  "testament": "new",
+  "book": null,
+  "limit": 1,
+  "offset": 0,
+  "max_distance": 0.75,
+  "matches": [
+    {
+      "distance": 0.3868603939491686,
+      "verses": [
+        {
+          "book": "John",
+          "chapter": 11,
+          "verse": 54,
+          "text": "Jesus therefore walked no more openly among the Jews; but went thence unto a country near to the wilderness, into a city called Ephraim, and there continued with his disciples."
+        },
+        {
+          "book": "John",
+          "chapter": 11,
+          "verse": 55,
+          "text": "And the Jews' passover was nigh at hand: and many went out of the country up to Jerusalem before the passover, to purify themselves."
+        },
+        {
+          "book": "John",
+          "chapter": 11,
+          "verse": 56,
+          "text": "Then sought they for Jesus, and spake among themselves, as they stood in the temple, What think ye, that he will not come to the feast?"
+        },
+        {
+          "book": "John",
+          "chapter": 11,
+          "verse": 57,
+          "text": "Now both the chief priests and the Pharisees had given a commandment, that, if any man knew where he were, he should shew {it}, that they might take him."
+        },
+        {
+          "book": "John",
+          "chapter": 12,
+          "verse": 1,
+          "text": "Then Jesus six days before the passover came to Bethany, where Lazarus was which had been dead, whom he raised from the dead."
+        }
+      ]
+    }
+  ]
+}
+```
+
 | Parameter      | Type    | Required | Default | Description |
 |----------------|---------|----------|---------|-------------|
 | `query`        | string  | Yes      | —       | Natural language query |
