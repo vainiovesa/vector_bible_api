@@ -35,6 +35,16 @@ class BibleVerse(Base):
 
 	__table_args__ = (
 		UniqueConstraint("translation_id", "book", "chapter", "verse", name="uq_bible_verse_reference"),
+		Index(
+            "ix_verses_embedding_hnsw",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+            postgresql_with={
+                "m": 16,
+                "ef_construction": 64,
+            },
+		),
 	)
 
 
@@ -49,6 +59,16 @@ class BibleChunk(Base):
 
 	__table_args__ = (
 		UniqueConstraint("begin_verse_id", "end_verse_id", name="uq_bible_chunk_reference"),
+		Index(
+            "ix_chunks_embedding_hnsw",
+            "embedding",
+            postgresql_using="hnsw",
+            postgresql_ops={"embedding": "vector_cosine_ops"},
+            postgresql_with={
+                "m": 16,
+                "ef_construction": 64,
+            },
+		),
 	)
 
 
