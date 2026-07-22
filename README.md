@@ -25,10 +25,10 @@ The API will be available on `http://localhost:8000`.
 ### Import scripts
 
 ```bash
-docker compose run --rm app python scripts/import_fi_1776.py
+docker compose run --rm app python scripts/thiagobodruk/import_fi_1776.py
 ```
 ```bash
-docker compose run --rm app python scripts/import_en_kjv.py
+docker compose run --rm app python scripts/thiagobodruk/import_en_kjv.py
 ```
 
 ### Chunk embedding
